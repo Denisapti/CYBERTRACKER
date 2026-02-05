@@ -113,7 +113,7 @@ When using MalwareBazaar data in reports:
 scanner/data/hashes.csv
 ```
 
-**Note**: CSV file is not version controlled (may be large)
+**Note**: CSV file is not version controlled (is excessively large)
 
 ### CSV Processing in CyberTracker
 

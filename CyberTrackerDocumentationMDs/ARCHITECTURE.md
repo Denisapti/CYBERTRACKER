@@ -12,14 +12,14 @@ CyberTracker implements a three-layer architecture for malware detection using t
                    │
 ┌──────────────────▼──────────────────────────────────────┐
 │              PROCESSING LAYER                           │
-│  • Compute SHA-256 hash of file (hashing.py)           │
-│  • Query database for hash match (db.py)               │
+│  • Compute SHA-256 hash of file (hashing.py)            │
+│  • Query database for hash match (db.py)                │
 └──────────────────┬──────────────────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────────────────┐
 │              DATA LAYER                                 │
-│  SQLite Database (malware_hashes.db)                   │
-│  Contains: sha256, malware_name, malware_family, source│
+│  SQLite Database (malware_hashes.db)                    │
+│  Contains: sha256, malware_name, malware_family, source │
 └──────────────────┬──────────────────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────────────────┐
@@ -198,7 +198,8 @@ All functionality uses Python standard library only.
 
 ### Database Lookup
 - **Primary key index**: O(1) lookup time on sha256
-- **Scalable to**: Millions of malware signatures
+- **Scalable to**: Millions of malware signatures 
+- **Dev appended note:**  currently 2.6 Million signatures stored
 
 ### CSV Import
 - **Streaming parse**: Processes CSV line-by-line
