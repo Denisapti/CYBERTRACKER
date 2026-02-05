@@ -2,6 +2,19 @@
 
 Welcome to CyberTracker, a threat intelligence-powered file scanning system that uses cryptographic hashing to identify known malware.
 
+IF YOU NEED HELP READING THESE FILES USE THE FOLOWING:
+**Browser Tools That Render Markdown Locally**
+
+1. **MarkView – Modern Markdown Viewer (Chrome/Chromium extension)**  
+    Installs as a browser extension, then you can open `.md` files (local or remote). It renders GitHub-Flavored Markdown nicely, supports diagrams (Mermaid) and math, and you can drag local files into the browser and see them rendered instantly. It doesn’t require a separate service or account — just the extension.
+    
+2. **Markdown Reader (Browser extension)**  
+    A simple browser extension that will render `.md` files in the browser. Great for double-clicking Markdown files and seeing them nicely formatted without any server or hosting setup.
+    
+3. **Online Markdown Viewers (no install)**  
+    Sites like **mdview.io** let you upload or drag-and-drop your `.md` files and instantly render them in the browser. It doesn’t host your repo, but it _does_ interpret your Markdown cleanly without installs — others just need to upload the files.  
+    Other similar viewers include generic “Markdown Viewer” sites where you paste or upload `.md` and get rendered HTML.
+
 ## Quick Overview
 
 CyberTracker is a Python-based application that:
