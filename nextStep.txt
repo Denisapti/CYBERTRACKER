@@ -1,0 +1,43 @@
+AUTOMATION: CSV UPDATE AND INGESTION PROCESS
+=============================================
+
+Goal: Automate checking for new MalwareBazaar data and re-ingest if updates exist.
+
+Approach:
+
+1. TRACK LAST UPDATE TIMESTAMP
+   - Create a metadata file (e.g., last_update.json) that stores:
+     * Last sync timestamp (when we last downloaded/ingested the CSV)
+     * CSV file hash/checksum for comparison
+   - Check this before attempting download
+
+2. CHECK MALWARE BAZAAR FOR UPDATES
+   - MalwareBazaar API endpoint: https://api.abuse.ch/api/v1/
+   - Query the API to get the "last-modified" timestamp of their dataset
+   - Compare with our stored timestamp:
+     * If remote is newer → download fresh CSV
+     * If same → skip download, use cached CSV
+   - Alternatively, download CSV and compare file hashes to detect changes
+
+3. DOWNLOAD FRESH CSV
+   - Use requests library to download from MalwareBazaar
+   - Store in data/ directory (overwrite old one or version it)
+   - Update metadata with new timestamp
+
+4. REPLACE DATABASE
+   - Option A (Current approach): Drop old DB, recreate schema, re-import
+   - Option B (Incremental): Only insert new rows (hashes not in DB)
+   - Option C (Safest): Keep old DB as backup, create new one, swap on success
+
+5. IMPLEMENTATION STRUCTURE
+   - Create an update_hashes.py script that:
+     * Checks metadata/API
+     * Downloads if needed
+     * Replaces database
+     * Updates metadata timestamp
+   - Call from main.py on startup or create a cron job for periodic updates
+
+NEXT STEPS TO RESEARCH:
+- MalwareBazaar API documentation for dataset metadata endpoints
+- Decide on incremental vs full replacement strategy
+- Handle error cases (network failure, corrupt download, etc.)
