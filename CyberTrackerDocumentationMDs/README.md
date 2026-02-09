@@ -88,3 +88,7 @@ python scanner/main.py /path/to/suspicious/file
 ---
 
 **Need help?** Check the [Setup & Usage Guide](SETUP_AND_USAGE.md) or explore the [Architecture Overview](ARCHITECTURE.md).
+
+
+
+git demo change pls ignore
