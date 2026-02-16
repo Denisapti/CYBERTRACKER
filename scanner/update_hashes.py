@@ -44,6 +44,8 @@ def download_csv():
 #---------------------------------------------------
 def rebuild_database():
   print("Rebuilding database...")
+  # ensure DB schema exists before importing rows
+  subprocess.run(["python", "scanner/init_db.py"], check=True)
   subprocess.run(["python", "scanner/import_hashes.py"], check=True)
 #---------------------------------------------------
 #Function: main
@@ -53,30 +55,45 @@ def rebuild_database():
 #3. Replace if changed
 #4. Revuild database if needed
 #---------------------------------------------------
-def main():
+def main(force: bool = False):
   download_csv()
 
-# If this is the first time (no CSV exists yet)
+  # ensure DB schema exists (idempotent)
+  subprocess.run(["python", "scanner/init_db.py"], check=True)
+
+  # If this is the first time (no CSV exists yet)
   if not os.path.exists(CSV_FILE):
     os.replace(TMP_FILE, CSV_FILE)
     print("Initial hashes.csv created.")
     rebuild_database()
     return
 
-# Compare old and new fule hashes
-old_hash = file_sha256(CSV_FILE)
-new_hash = file_sha256(TMP_FILE)
+  # Compare old and new file hashes
+  old_hash = file_sha256(CSV_FILE)
+  new_hash = file_sha256(TMP_FILE)
 
-if old_hash == new_hash:
-  print("No update detected.")
-  os.remove(TMP_FILE)
-else:
-  print("Update detected. Replacing hashes.csv...")
-  os.replace(TMP_FILE, CSV_FILE)
-  rebuild_database()
-  print("Update complete.")
+  if old_hash == new_hash:
+    print("No update detected.")
+    # honor explicit force request
+    if force:
+      print("Force flag set — rebuilding database despite identical CSV...")
+      os.remove(TMP_FILE)
+      rebuild_database()
+      print("Force rebuild complete.")
+      return
+    else:
+      print("No import required. To force a rebuild use --force.")
+      os.remove(TMP_FILE)
+      return
+  else:
+    print("Update detected. Replacing hashes.csv...")
+    os.replace(TMP_FILE, CSV_FILE)
+    rebuild_database()
+    print("Update complete.")
 
 #Run the script
-if  __name__=="__main__":
-    main()
+if __name__ == "__main__":
+    import sys
+    force_flag = "--force" in sys.argv or "--force-update" in sys.argv
+    main(force=force_flag)
 
