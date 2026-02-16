@@ -1,1 +1,12 @@
-progress>>>
+The update_hashes.py module automates the process of keeping the local MalwareBazaar hash dataset up to date. 
+Instead of manually downloading and replacing the CSV file, this script automatically downloads the latest dataset, 
+compares it with the existing local version, and updates the database only if changes are detected. 
+This helps ensure the system always works with the most recent threat intelligence data while avoiding unnecessary database rebuilds.
+
+What the script does:
+Downloads the latest CSV dataset from MalwareBazaar
+Compares the new file with the existing hashes.csv using SHA-256 hashing
+Detects whether the dataset has changed
+Replaces the old CSV file if an update is detected
+Rebuilds the database using import_hashes.py
+Skips the rebuild process if no changes are found
