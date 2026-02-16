@@ -1,5 +1,5 @@
 AUTOMATION: CSV UPDATE AND INGESTION PROCESS
-==================================================
+================
 
 Goal: Automate checking for new MalwareBazaar data and re-ingest if updates exist.
 
