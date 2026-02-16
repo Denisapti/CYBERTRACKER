@@ -1,5 +1,1 @@
-Okay so itll be a little confusing but i tried adding comments where i could, you first want to start by making sure something is in the database and that you have your hashes.csv file locally stored under data
-After this ( i belive ) you can just run API_LocalComparison.py and itll handle it, Osama is going to have to use that result to code his section, you can ust use the fron ... import... stuff but yeah
-There MAY be an issue in API_LocalComparison.py where its using my ayuth code in the beginning but you can apply for your own for free on the malwareabazaar api site easily for free should only take a few minutes
-If for some reason running API_LocalComparison.py isnt working you can try runnung in this order getRecentAPIData.py >> localHashes_Check.py >> API local comparison, it shouldnt have to come to that because im already importing the functions from those other two into the localcomparison code but just incase
-Any questions just ask me or dennis
+progress>>>
