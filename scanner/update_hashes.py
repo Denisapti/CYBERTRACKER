@@ -57,11 +57,11 @@ def main():
   download_csv()
 
 # If this is the first time (no CSV exists yet)
-if not os.path.exists(CSV_FILE):
-  os.replace(TMP_FILE, CSV_FILE)
-  print("Initial hashes.csv created.")
-  rebuild_database()
-  return
+  if not os.path.exists(CSV_FILE):
+    os.replace(TMP_FILE, CSV_FILE)
+    print("Initial hashes.csv created.")
+    rebuild_database()
+    return
 
 # Compare old and new fule hashes
 old_hash = file_sha256(CSV_FILE)
