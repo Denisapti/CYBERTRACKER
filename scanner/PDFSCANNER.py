@@ -76,24 +76,30 @@ class PDFScanner:
         # Start traversal from trailer (top-level structure)
         walk(reader.trailer)
 
-        # Convert to Capability objects
-        self.output["capabilities"] = [
-            Capability(name).__dict__ for name in sorted(capabilities)
-        ]
+        # Convert to Capability objects (keep them as objects, not dicts)
+        self.output["capabilities"] = [Capability(name) for name in sorted(capabilities)]
 
         return self.output
 
 
-def main():
+def main(file_path: str):
     """Main entry point for PDF Scanner module."""
     scanner = PDFScanner()
-
-    # Example usage (replace with real file path)
-    file_path = "sample.pdf"
     result = scanner.scan(file_path)
 
-    print(result)
+    # Print capability names for demonstration
+    print("PDF Capabilities:")
+    for cap in result["capabilities"]:
+        print(f"- {cap.name}")
+
+    return result
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    if len(sys.argv) < 2:
+        print("Usage: python pdf_scanner.py <path_to_pdf>")
+    else:
+        pdf_path = sys.argv[1]
+        main(pdf_path)
