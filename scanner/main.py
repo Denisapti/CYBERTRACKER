@@ -3,6 +3,7 @@ import json
 from hashing import sha256_file
 from db import check_hash
 from API_LocalComparison import main as check_db
+from scanner.file_type_detector import investigate_file
 from update_hashes import main as update_hashes_main
 
 def main(file_path, force: bool = False):
@@ -43,10 +44,14 @@ def main(file_path, force: bool = False):
             "detection_method": "Threat intelligence hash match"
         }
     else:
+        #call the file type detector and investigation modules here to do the actual analysis of the file.
+        analysis_result = investigate_file(file_path)
+        # add the analysis result to the verdict
         verdict = {
             "file_hash": file_hash,
             "known_malware": False,
-            "detection_method": "No match in threat intelligence database"
+            "detection_method": "No match in threat intelligence database",
+            "analysis_result": analysis_result
         }
 
     print(json.dumps(verdict, indent=2))

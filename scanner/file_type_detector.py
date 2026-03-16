@@ -13,12 +13,12 @@ def investigateEXE(file_path):
     print(f"Investigating EXE file: {file_path}")
     #call PEFILESCANNER.py here to do the actual analysis of the EXE file.
 
-    PEFILESCANNER.scan(file_path)
+    return PEFILESCANNER.scan(file_path)
 
 
 def investigatePDF(file_path):
     print(f"Investigating PDF file: {file_path}")
-    PDFSCANNER.scan(file_path)
+    return PDFSCANNER.scan(file_path)
 
 # //////////////////////////////////////////////
 # Function: detect_file_type
@@ -44,10 +44,11 @@ def investigate_file(file_path):
     file_type = detect_file_type(file_path)
 
     if file_type == ".exe":
-        investigateEXE(file_path)
+        return investigateEXE(file_path)
 
     elif file_type == ".pdf":
-        investigatePDF(file_path)
+        return investigatePDF(file_path)
 
     else:
         print(f"File type '{file_type}' is not supported in this prototype.")
+        return None
