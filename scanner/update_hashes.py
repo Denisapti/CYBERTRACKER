@@ -7,10 +7,10 @@ import subprocess
 CSV_URL = "https://bazaar.abuse.ch/export/csv/recent/"
 
 #Path to the current CSV file used by the system
-CSV_FILE = "scanner/data/hashes.csv"
+CSV_FILE = "data/hashes.csv"
 
 #Temporary file used to compare new download before replacing
-TMP_FILE = "scanner/data/hashes.csv.tmp"
+TMP_FILE = "data/hashes.csv.tmp"
 
 
 
@@ -45,8 +45,8 @@ def download_csv():
 def rebuild_database():
   print("Rebuilding database...")
   # ensure DB schema exists before importing rows
-  subprocess.run(["python", "scanner/init_db.py"], check=True)
-  subprocess.run(["python", "scanner/import_hashes.py"], check=True)
+  subprocess.run(["python", "init_db.py"], check=True)
+  subprocess.run(["python", "import_hashes.py"], check=True)
 #---------------------------------------------------
 #Function: main
 #Purpose: Controls update process
@@ -59,7 +59,7 @@ def main(force: bool = False):
   download_csv()
 
   # ensure DB schema exists (idempotent)
-  subprocess.run(["python", "scanner/init_db.py"], check=True)
+  subprocess.run(["python", "init_db.py"], check=True)
 
   # If this is the first time (no CSV exists yet)
   if not os.path.exists(CSV_FILE):
