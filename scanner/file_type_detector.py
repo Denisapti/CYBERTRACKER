@@ -1,5 +1,8 @@
 import os
 
+from scanner import PEFILESCANNER as PEFILESCANNER
+from scanner import PDFSCANNER
+
 # //////////////////////////////////////////////
 # Investigation functions
 # These represent the analysis modules for supported file types.
@@ -8,11 +11,14 @@ import os
 
 def investigateEXE(file_path):
     print(f"Investigating EXE file: {file_path}")
+    #call PEFILESCANNER.py here to do the actual analysis of the EXE file.
+
+    PEFILESCANNER.scan(file_path)
 
 
 def investigatePDF(file_path):
     print(f"Investigating PDF file: {file_path}")
-
+    PDFSCANNER.scan(file_path)
 
 # //////////////////////////////////////////////
 # Function: detect_file_type
