@@ -58,9 +58,7 @@ class PEScanner:
                     if api_name in self.SUSPICIOUS_APIS:
                         capabilities.add(self.SUSPICIOUS_APIS[api_name])
 
-        self.output["capabilities"] = [
-            Capability(name) for name in sorted(capabilities)
-        ]
+        self.output["capabilities"] = sorted(capabilities)
 
         return self.output
 
@@ -74,9 +72,15 @@ def main(file_path: str):
     print("PE Capabilities:")
 
     for cap in result["capabilities"]:
-        print(f"- {cap.name}")
+        print(f"- {cap}")
 
     return result
+
+
+def scan(file_path: str):
+    """Module-level scan function for compatibility."""
+    scanner = PEScanner()
+    return scanner.scan(file_path)
 
 
 if __name__ == "__main__":

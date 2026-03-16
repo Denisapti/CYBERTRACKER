@@ -1,7 +1,7 @@
 import os
 
-from scanner import PEFILESCANNER as PEFILESCANNER
-from scanner import PDFSCANNER
+import PEFILESCANNER
+import PDFSCANNER
 
 # //////////////////////////////////////////////
 # Investigation functions

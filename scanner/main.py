@@ -3,7 +3,7 @@ import json
 from hashing import sha256_file
 from db import check_hash
 from API_LocalComparison import main as check_db
-from scanner.file_type_detector import investigate_file
+from file_type_detector import investigate_file
 from update_hashes import main as update_hashes_main
 
 def main(file_path, force: bool = False):

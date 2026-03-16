@@ -77,7 +77,7 @@ class PDFScanner:
         walk(reader.trailer)
 
         # Convert to Capability objects (keep them as objects, not dicts)
-        self.output["capabilities"] = [Capability(name) for name in sorted(capabilities)]
+        self.output["capabilities"] = sorted(capabilities)
 
         return self.output
 
@@ -90,9 +90,15 @@ def main(file_path: str):
     # Print capability names for demonstration
     print("PDF Capabilities:")
     for cap in result["capabilities"]:
-        print(f"- {cap.name}")
+        print(f"- {cap}")
 
     return result
+
+
+def scan(file_path: str):
+    """Module-level scan function for compatibility."""
+    scanner = PDFScanner()
+    return scanner.scan(file_path)
 
 
 if __name__ == "__main__":
