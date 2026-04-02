@@ -6,14 +6,7 @@ This module provides Windows PE scanning functionality for the CYBERTRACKER appl
 import pefile
 
 
-class Capability:
-    """Represents a capability of the PE scanner."""
-    def __init__(self, name: str):
-        self.name = name
-
-
 class PEScanner:
-    """Handles PE scanning operations."""
 
     SUSPICIOUS_APIS = {
         "CreateFile": "file_access",
@@ -30,22 +23,53 @@ class PEScanner:
         "RegCreateKey": "registry_modification"
     }
 
+    RISK_WEIGHTS = {
+        "file_access": 3,
+        "file_write": 6,
+        "file_read": 2,
+        "process_execution": 8,
+        "process_injection": 10,
+        "network_activity": 6,
+        "downloads_file": 8,
+        "registry_modification": 7
+    }
+
     def __init__(self):
-        """Initialize the PE Scanner."""
+
         self.output = {
             "File Type": "PE",
-            "capabilities": []
+            "capabilities": [],
+            "risk_percentage": 0,
+            "risk_level": "NONE"
         }
 
+    def _calculate_risk(self, capabilities):
+
+        score = sum(self.RISK_WEIGHTS.get(cap, 1) for cap in capabilities)
+        max_score = sum(self.RISK_WEIGHTS.values())
+
+        percentage = round((score / max_score) * 100, 2)
+
+        if percentage >= 70:
+            level = "CRITICAL"
+        elif percentage >= 50:
+            level = "HIGH"
+        elif percentage >= 25:
+            level = "MEDIUM"
+        elif percentage > 0:
+            level = "LOW"
+        else:
+            level = "NONE"
+
+        return percentage, level
+
     def scan(self, file_path: str):
-        """
-        Scan a PE file and extract capabilities based on imported APIs.
-        """
 
         pe = pefile.PE(file_path)
         capabilities = set()
 
         if hasattr(pe, "DIRECTORY_ENTRY_IMPORT"):
+
             for entry in pe.DIRECTORY_ENTRY_IMPORT:
 
                 for imp in entry.imports:
@@ -58,37 +82,17 @@ class PEScanner:
                     if api_name in self.SUSPICIOUS_APIS:
                         capabilities.add(self.SUSPICIOUS_APIS[api_name])
 
-        self.output["capabilities"] = sorted(capabilities)
+        capabilities = sorted(capabilities)
+
+        risk_percentage, risk_level = self._calculate_risk(capabilities)
+
+        self.output["capabilities"] = capabilities
+        self.output["risk_percentage"] = risk_percentage
+        self.output["risk_level"] = risk_level
 
         return self.output
 
 
-def main(file_path: str):
-    """Main entry point for PE Scanner module."""
-
-    scanner = PEScanner()
-    result = scanner.scan(file_path)
-
-    print("PE Capabilities:")
-
-    for cap in result["capabilities"]:
-        print(f"- {cap}")
-
-    return result
-
-
 def scan(file_path: str):
-    """Module-level scan function for compatibility."""
     scanner = PEScanner()
     return scanner.scan(file_path)
-
-
-if __name__ == "__main__":
-
-    import sys
-
-    if len(sys.argv) < 2:
-        print("Usage: python pe_scanner.py <path_to_executable>")
-    else:
-        pe_path = sys.argv[1]
-        main(pe_path)
