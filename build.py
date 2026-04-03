@@ -42,6 +42,7 @@ def build_executable():
         "--name", "CYBERTRACKER",      # Output executable name
         "--clean",                     # Remove old build files
         "--collect-all", "pefile",     # Include pefile module and dependencies
+        "--hidden-import=requests",    # Explicitly include requests module
         "scanner/main.py"              # Entry point
     ]
     
