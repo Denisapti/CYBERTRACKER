@@ -42,16 +42,66 @@ def build_executable():
     if os.path.exists(icon_path):
         cmd.extend(["--icon", icon_path])
     
-    # Add remaining arguments
-    data_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "scanner", "data"))
+    # Resolve candidate data dirs.
+    scanner_data_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "scanner", "data"))
+    data_dir = None
+
+    # Make sure scanner data directory exists, even if repository ignored data files
+    if not os.path.isdir(scanner_data_dir):
+        os.makedirs(scanner_data_dir, exist_ok=True)
+
+    # If the source data directory has hashes ready, use it
+    if os.path.exists(os.path.join(scanner_data_dir, "hashes.csv")):
+        data_dir = scanner_data_dir
+
+    user_data_dir = None
+    try:
+        from scanner.paths import get_user_data_dir
+        user_data_dir = get_user_data_dir()
+    except Exception:
+        user_data_dir = None
+
+    if data_dir is None and user_data_dir:
+        # Use AppData cache if available
+        if os.path.exists(os.path.join(user_data_dir, "hashes.csv")):
+            data_dir = user_data_dir
+
+    if data_dir is None:
+        # No data anywhere, attempt to bootstrap via update_hashes
+        print("Data not found in scanner/data or AppData; attempting to download/initialize data...")
+        try:
+            from scanner.update_hashes import main as update_hashes_main
+            update_hashes_main(force=True)
+            if user_data_dir and os.path.exists(os.path.join(user_data_dir, "hashes.csv")):
+                data_dir = user_data_dir
+                print(f"Downloaded data into: {data_dir}")
+        except Exception as e:
+            print(f"Failed to download data during build bootstrap: {e}")
+
+    # If we have AppData data but scanner/data path is empty, mirror it for bundling
+    if data_dir and data_dir != scanner_data_dir:
+        src_csv = os.path.join(data_dir, "hashes.csv")
+        src_meta = os.path.join(data_dir, "metadata.json")
+        if os.path.exists(src_csv):
+            shutil.copy2(src_csv, os.path.join(scanner_data_dir, "hashes.csv"))
+        if os.path.exists(src_meta):
+            shutil.copy2(src_meta, os.path.join(scanner_data_dir, "metadata.json"))
+        data_dir = scanner_data_dir
+        print(f"Resolved data dir for bundling: {data_dir}")
+
+    if data_dir is None:
+        raise FileNotFoundError("Unable to locate or generate scanner data (hashes.csv, metadata.json).")
+
     if sys.platform == "win32":
-        add_data_value = f"{data_path};data"
+        add_data_value = f"{data_dir};data"
     else:
-        add_data_value = f"{data_path}:data"
+        add_data_value = f"{data_dir}:data"
+
+    add_data_args = ["--add-data", add_data_value]
 
     cmd.extend([
         "--clean",                    # Remove temporary files from previous builds
-        "--add-data", add_data_value,  # Bundle data
+        *add_data_args,
         "--collect-all", "pefile",   # Include pefile module
         "scanner/main.py"              # Main entry point
     ])
