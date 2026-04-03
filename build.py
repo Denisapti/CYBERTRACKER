@@ -26,6 +26,10 @@ def build_executable():
         print("PyInstaller not found. Installing...")
         subprocess.run([sys.executable, "-m", "pip", "install", "pyinstaller", "-q"], check=True)
     
+    # Ensure required runtime dependencies are installed for bundling
+    print("Ensuring required dependencies are installed...")
+    subprocess.run([sys.executable, "-m", "pip", "install", "requests", "pefile", "-q"], check=True)
+    
     print("Building CYBERTRACKER executable...")
     print("(Data files will be downloaded on first run)\n")
     
