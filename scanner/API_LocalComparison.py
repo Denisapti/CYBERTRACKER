@@ -3,6 +3,7 @@ from localHashes_Check import last_modified
 from datetime import datetime
 import os
 import json
+from paths import get_metadata_path
 
 def _parse_ts(s: str):
     try:
@@ -27,7 +28,7 @@ def main() -> bool:
 
     # Check metadata (written after successful import) as an authoritative signal
     try:
-        metadata_path = os.path.join(os.path.dirname(__file__), "data", "metadata.json")
+        metadata_path = get_metadata_path()
         if os.path.exists(metadata_path):
             with open(metadata_path, "r", encoding="utf-8") as mf:
                 meta = json.load(mf)

@@ -1,12 +1,17 @@
 import sys
 import json
+from db_init import ensure_user_db_exists
 from hashing import sha256_file
 from db import check_hash
 from API_LocalComparison import main as check_db
 from file_type_detector import investigate_file
 from update_hashes import main as update_hashes_main
+from ui import show_scan_result, show_error
 
-def main(file_path, force: bool = False):
+def main(file_path, force: bool = False, cli_mode: bool = False):
+    # Ensure database is initialized before any operations
+    ensure_user_db_exists()
+    
     # run DB freshness check first
     try:
         up_to_date = check_db()
@@ -55,22 +60,39 @@ def main(file_path, force: bool = False):
         }
 
     print(json.dumps(verdict, indent=2))
+    
+    # Also show GUI popup if not in CLI mode
+    if not cli_mode:
+        try:
+            show_scan_result(verdict)
+        except Exception as e:
+            print(f"Warning: UI display failed: {e}")
 
 if __name__ == "__main__":
-    # usage: python main.py <file_path> [--force]
-    if len(sys.argv) < 2 or len(sys.argv) > 3:
-        print("Usage: python main.py <file_path> [--force]")
+    # usage: python main.py <file_path> [--force] [--cli]
+    if len(sys.argv) < 2 or len(sys.argv) > 4:
+        print("Usage: python main.py <file_path> [--force] [--cli]")
         sys.exit(1)
 
     force_flag = "--force" in sys.argv or "--force-update" in sys.argv
+    cli_flag = "--cli" in sys.argv
     file_arg = None
     for a in sys.argv[1:]:
-        if a == "--force" or a == "--force-update":
+        if a == "--force" or a == "--force-update" or a == "--cli":
             continue
         file_arg = a
 
     if not file_arg:
-        print("Usage: python main.py <file_path> [--force]")
+        print("Usage: python main.py <file_path> [--force] [--cli]")
         sys.exit(1)
 
-    main(file_arg, force=force_flag)
+    try:
+        main(file_arg, force=force_flag, cli_mode=cli_flag)
+    except Exception as e:
+        error_msg = f"Scan failed: {str(e)}"
+        print(f"Error: {error_msg}", file=sys.stderr)
+        try:
+            show_error(error_msg)
+        except:
+            pass  # UI not available, just continue
+        sys.exit(1)

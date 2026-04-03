@@ -13,7 +13,13 @@ def resource_path(name):
     return os.path.join(get_base_path(), name)
 
 def get_user_data_dir():
-    base = os.getenv("APPDATA")
+    # On Windows: use APPDATA; on other OSes: use home directory
+    if sys.platform == "win32":
+        base = os.getenv("APPDATA")
+    else:
+        # Linux/Mac: use home directory
+        base = os.path.expanduser("~")
+    
     path = os.path.join(base, APP_NAME)
     os.makedirs(path, exist_ok=True)
     return path

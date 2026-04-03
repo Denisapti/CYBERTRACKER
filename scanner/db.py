@@ -1,9 +1,8 @@
 import sqlite3
-
-DB_PATH = "malware_hashes.db"
+from paths import get_user_db_path
 
 def get_connection():
-    return sqlite3.connect(DB_PATH)
+    return sqlite3.connect(get_user_db_path())
 
 def check_hash(sha256_hash):
     conn = get_connection()

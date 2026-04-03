@@ -2,15 +2,18 @@ import os
 import hashlib
 import requests
 import subprocess
+from paths import get_user_csv_path, get_user_data_dir
+from init_db import init_user_db
+from import_hashes import import_user_hashes
 
 #URL for downloading the latest MalwareBazaar CSV
 CSV_URL = "https://bazaar.abuse.ch/export/csv/recent/"
 
 #Path to the current CSV file used by the system
-CSV_FILE = "data/hashes.csv"
+CSV_FILE = get_user_csv_path()
 
 #Temporary file used to compare new download before replacing
-TMP_FILE = "data/hashes.csv.tmp"
+TMP_FILE = os.path.join(get_user_data_dir(), "hashes.csv.tmp")
 
 
 
@@ -39,14 +42,14 @@ def download_csv():
     f.write(response.content)
 #---------------------------------------------------
 #Function: rebuild_database
-#Purpose: Re_run import_hashes.py to rebuild database
+#Purpose: Initialize DB schema and import hashes
 #after CSV is updated
 #---------------------------------------------------
 def rebuild_database():
   print("Rebuilding database...")
   # ensure DB schema exists before importing rows
-  subprocess.run(["python", "init_db.py"], check=True)
-  subprocess.run(["python", "import_hashes.py"], check=True)
+  init_user_db()
+  import_user_hashes()
 #---------------------------------------------------
 #Function: main
 #Purpose: Controls update process
@@ -59,7 +62,7 @@ def main(force: bool = False):
   download_csv()
 
   # ensure DB schema exists (idempotent)
-  subprocess.run(["python", "init_db.py"], check=True)
+  init_user_db()
 
   # If this is the first time (no CSV exists yet)
   if not os.path.exists(CSV_FILE):

@@ -1,0 +1,19 @@
+Windows Registry Editor Version 5.00
+
+; This file adds "Scan with CYBERTRACKER" to the right-click context menu for all files
+; 
+; To use:
+; 1. Replace C:\Path\To\CYBERTRACKER with the actual install path
+; 2. Double-click this file to import into registry
+; 3. Right-click any file and select "Scan with CYBERTRACKER"
+;
+; To remove:
+; 1. Delete the registry key: HKEY_CLASSES_ROOT\*\shell\ScanWithCYBERTRACKER
+;
+
+[HKEY_CLASSES_ROOT\*\shell\ScanWithCYBERTRACKER]
+@="Scan with CYBERTRACKER"
+"Icon"="C:\\Path\\To\\CYBERTRACKER\\main.exe,0"
+
+[HKEY_CLASSES_ROOT\*\shell\ScanWithCYBERTRACKER\command]
+@="\"C:\\Path\\To\\CYBERTRACKER\\main.exe\" \"%1\""

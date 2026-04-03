@@ -1,8 +1,9 @@
 import os
 import csv
 from datetime import datetime
+from paths import get_user_csv_path
 
-file_path = "/workspaces/CYBERTRACKER/scanner/data/hashes.csv"
+file_path = get_user_csv_path()
 
 # Try to determine the newest `first_seen_utc` value inside the CSV itself
 # (this matches the timestamp returned by the MalwareBazaar API). If parsing
@@ -37,7 +38,17 @@ if _newest:
     last_modified = _newest.strftime("%Y-%m-%d %H:%M:%S")
 else:
     # fallback to filesystem modification time
-    mod_timestamp = os.path.getmtime(file_path)
-    last_modified = datetime.fromtimestamp(mod_timestamp).strftime("%Y-%m-%d %H:%M:%S")
+    try:
+        if os.path.exists(file_path):
+            mod_timestamp = os.path.getmtime(file_path)
+            last_modified = datetime.fromtimestamp(mod_timestamp).strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            # CSV doesn't exist yet; use placeholder
+            last_modified = None
+    except Exception:
+        last_modified = None
 
-print("The local hashes file was last modified on:", last_modified)
+if last_modified:
+    print("The local hashes file was last modified on:", last_modified)
+else:
+    print("Local hashes file not yet initialized.")
