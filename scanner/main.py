@@ -42,6 +42,7 @@ def main(file_path, force: bool = False, cli_mode: bool = False):
     if result:
         malware_name, malware_family = result
         verdict = {
+            "file_path": file_path,
             "file_hash": file_hash,
             "known_malware": True,
             "malware_name": malware_name,
@@ -53,6 +54,7 @@ def main(file_path, force: bool = False, cli_mode: bool = False):
         analysis_result = investigate_file(file_path)
         # add the analysis result to the verdict
         verdict = {
+            "file_path": file_path,
             "file_hash": file_hash,
             "known_malware": False,
             "detection_method": "No match in threat intelligence database",
