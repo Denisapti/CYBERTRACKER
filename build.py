@@ -43,10 +43,17 @@ def build_executable():
         cmd.extend(["--icon", icon_path])
     
     # Add remaining arguments
+    data_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "scanner", "data"))
+    if sys.platform == "win32":
+        add_data_value = f"{data_path};data"
+    else:
+        add_data_value = f"{data_path}:data"
+
     cmd.extend([
-        "--add-data", "scanner/data;data" if sys.platform == "win32" else "scanner/data:data",  # Bundle data
-        "--collect-all", "pefile",                     # Include pefile module
-        "scanner/main.py"                              # Main entry point
+        "--clean",                    # Remove temporary files from previous builds
+        "--add-data", add_data_value,  # Bundle data
+        "--collect-all", "pefile",   # Include pefile module
+        "scanner/main.py"              # Main entry point
     ])
     
     print(f"Running: {' '.join(cmd)}")
