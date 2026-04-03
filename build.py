@@ -35,14 +35,19 @@ def build_executable():
         "--onedir",                                    # Folder build (better than --onefile)
         "--windowed",                                  # No console window
         "--name", "CYBERTRACKER",                     # Executable name
-        "--icon", "scanner/icon.ico" if os.path.exists("scanner/icon.ico") else None,  # Optional icon
+    ]
+    
+    # Add icon if it exists
+    icon_path = "scanner/icon.ico"
+    if os.path.exists(icon_path):
+        cmd.extend(["--icon", icon_path])
+    
+    # Add remaining arguments
+    cmd.extend([
         "--add-data", "scanner/data;data" if sys.platform == "win32" else "scanner/data:data",  # Bundle data
         "--collect-all", "pefile",                     # Include pefile module
         "scanner/main.py"                              # Main entry point
-    ]
-    
-    # Remove None values from command
-    cmd = [x for x in cmd if x is not None]
+    ])
     
     print(f"Running: {' '.join(cmd)}")
     result = subprocess.run(cmd, cwd=os.path.dirname(os.path.abspath(__file__)))
