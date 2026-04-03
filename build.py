@@ -13,7 +13,11 @@ import subprocess
 import shutil
 
 def build_executable():
-    """Build the executable using PyInstaller."""
+    """Build the executable using PyInstaller.
+    
+    Data files (hashes.csv, database.db) are NOT bundled.
+    They will be downloaded/initialized on first run by the application.
+    """
     
     # Check if PyInstaller is installed
     try:
@@ -23,99 +27,36 @@ def build_executable():
         subprocess.run([sys.executable, "-m", "pip", "install", "pyinstaller", "-q"], check=True)
     
     print("Building CYBERTRACKER executable...")
+    print("(Data files will be downloaded on first run)\n")
     
     # PyInstaller command
-    # --onedir: creates folder with .exe and dependencies (cleaner for writable data)
-    # --windowed: no console window
-    # --add-data: bundle the data folder with read-only files
-    # --name: output executable name
+    # --onedir: folder build with .exe and dependencies in separate folder
+    # --windowed: no console window on startup
+    # --clean: remove old build artifacts
+    # --collect-all pefile: bundle the pefile module completely
     
     cmd = [
         sys.executable, "-m", "PyInstaller",
-        "--onedir",                                    # Folder build (better than --onefile)
-        "--windowed",                                  # No console window
-        "--name", "CYBERTRACKER",                     # Executable name
+        "--onedir",                    # Folder build (cleaner, keeps deps separate)
+        "--windowed",                  # No console window
+        "--name", "CYBERTRACKER",      # Output executable name
+        "--clean",                     # Remove old build files
+        "--collect-all", "pefile",     # Include pefile module and dependencies
+        "scanner/main.py"              # Entry point
     ]
     
-    # Add icon if it exists
-    icon_path = "scanner/icon.ico"
-    if os.path.exists(icon_path):
-        cmd.extend(["--icon", icon_path])
-    
-    # Resolve candidate data dirs.
-    scanner_data_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "scanner", "data"))
-    data_dir = None
-
-    # Make sure scanner data directory exists, even if repository ignored data files
-    if not os.path.isdir(scanner_data_dir):
-        os.makedirs(scanner_data_dir, exist_ok=True)
-
-    # If the source data directory has hashes ready, use it
-    if os.path.exists(os.path.join(scanner_data_dir, "hashes.csv")):
-        data_dir = scanner_data_dir
-
-    user_data_dir = None
-    try:
-        from scanner.paths import get_user_data_dir
-        user_data_dir = get_user_data_dir()
-    except Exception:
-        user_data_dir = None
-
-    if data_dir is None and user_data_dir:
-        # Use AppData cache if available
-        if os.path.exists(os.path.join(user_data_dir, "hashes.csv")):
-            data_dir = user_data_dir
-
-    if data_dir is None:
-        # No data anywhere, attempt to bootstrap via update_hashes
-        print("Data not found in scanner/data or AppData; attempting to download/initialize data...")
-        try:
-            from scanner.update_hashes import main as update_hashes_main
-            update_hashes_main(force=True)
-            if user_data_dir and os.path.exists(os.path.join(user_data_dir, "hashes.csv")):
-                data_dir = user_data_dir
-                print(f"Downloaded data into: {data_dir}")
-        except Exception as e:
-            print(f"Failed to download data during build bootstrap: {e}")
-
-    # If we have AppData data but scanner/data path is empty, mirror it for bundling
-    if data_dir and data_dir != scanner_data_dir:
-        src_csv = os.path.join(data_dir, "hashes.csv")
-        src_meta = os.path.join(data_dir, "metadata.json")
-        if os.path.exists(src_csv):
-            shutil.copy2(src_csv, os.path.join(scanner_data_dir, "hashes.csv"))
-        if os.path.exists(src_meta):
-            shutil.copy2(src_meta, os.path.join(scanner_data_dir, "metadata.json"))
-        data_dir = scanner_data_dir
-        print(f"Resolved data dir for bundling: {data_dir}")
-
-    if data_dir is None:
-        raise FileNotFoundError("Unable to locate or generate scanner data (hashes.csv, metadata.json).")
-
-    if sys.platform == "win32":
-        add_data_value = f"{data_dir};data"
-    else:
-        add_data_value = f"{data_dir}:data"
-
-    add_data_args = ["--add-data", add_data_value]
-
-    cmd.extend([
-        "--clean",                    # Remove temporary files from previous builds
-        *add_data_args,
-        "--collect-all", "pefile",   # Include pefile module
-        "scanner/main.py"              # Main entry point
-    ])
-    
-    print(f"Running: {' '.join(cmd)}")
+    print(f"Running: {' '.join(cmd)}\n")
     result = subprocess.run(cmd, cwd=os.path.dirname(os.path.abspath(__file__)))
     
     if result.returncode == 0:
         print("\n✓ Build successful!")
         print(f"\nExecutable created at: dist/CYBERTRACKER/main.exe")
-        print("\nNext steps:")
-        print("1. Test the executable: dist/CYBERTRACKER/main.exe <test_file>")
-        print("2. Create registry file to add context menu")
-        print("3. Double-click the .reg file to integrate with Windows")
+        print("\n📋 Next steps:")
+        print("1. First run: main.exe will download malware data from MalwareBazaar (~100-200MB)")
+        print("   This creates files in: %APPDATA%\\CYBERTRACKER\\")
+        print("2. Generate context menu: python generate_context_menu.py")
+        print("3. Install: Double-click install_context_menu.reg")
+        print("4. Use: Right-click any file → 'Scan with CYBERTRACKER'")
     else:
         print("\n✗ Build failed!")
         sys.exit(1)
